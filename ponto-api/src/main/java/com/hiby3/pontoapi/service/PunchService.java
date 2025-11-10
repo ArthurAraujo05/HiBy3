@@ -32,6 +32,7 @@ public class PunchService {
      * logado.
      * Este é o método principal de "bater o ponto".
      */
+
     public void registerPunchEvent(User loggedInUser, PunchEventRequestDTO request) {
 
         Integer employeeId = loggedInUser.getClientEmployeeId();
@@ -67,12 +68,13 @@ public class PunchService {
             e.printStackTrace();
             throw new RuntimeException("Erro ao registrar batida de ponto: " + e.getMessage());
         }
-    } // <-- ESTA CHAVE FECHA o método registerPunchEvent
+    } 
 
     /**
      * Solicita a EDIÇÃO de uma batida de ponto existente.
      * Isso é o que o funcionário chama quando "esqueci de bater o ponto".
      */
+
     public void requestPunchEdit(User loggedInUser, Integer punchId, PunchEditRequestDTO request) {
 
         Integer employeeId = loggedInUser.getClientEmployeeId();
@@ -124,6 +126,7 @@ public class PunchService {
      * @param rhUser  O usuário (RH) que está logado e fazendo a aprovação.
      * @param punchId O ID da batida de ponto que está sendo aprovada.
      */
+
     public void approvePunchEdit(User rhUser, Integer punchId) {
 
         // 1. Pega as informações da empresa do RH
@@ -135,37 +138,30 @@ public class PunchService {
 
         System.out.println(">>> (Cliente " + tenantDatabaseName + ") RH (User ID: " + rhUser.getId() +
                 ") está APROVANDO o punch_id: " + punchId);
-
-        // 2. Pega a conexão para o banco do cliente
         DataSource tenantDb = tenantDataSource.getDataSource(tenantDatabaseName);
 
-        // 3. Prepara o SQL para ATUALIZAR a batida
-        // (Mudamos o status para 'APROVADO',
-        // COPIAMOS o 'requested_timestamp' para o 'timestamp' original,
-        // e salvamos quem foi o RH que aprovou)
         String sql = "UPDATE punch p " +
                 "JOIN employee e ON p.employee_id = e.id " +
-                "JOIN empresa_master.users u ON e.id = u.client_employee_id " + // Junção complexa!
+                "JOIN empresa_master.users u ON e.id = u.client_employee_id " + 
                 "SET " +
                 "  p.status = 'APROVADO', " +
-                "  p.timestamp = p.requested_timestamp, " + // O ponto é oficialmente alterado!
-                "  p.reviewed_by_rh_id = ? " + // O ID do RH (do banco MESTRE)
+                "  p.timestamp = p.requested_timestamp, " + 
+                "  p.reviewed_by_rh_id = ? " + 
                 "WHERE " +
-                "  p.id = ? AND " + // O ID da batida
-                "  p.status = 'PENDENTE_EDICAO' AND " + // Só podemos aprovar o que está pendente
-                "  u.empresa_id = ?"; // Garante que o RH só aprove pontos da SUA empresa
+                "  p.id = ? AND " + 
+                "  p.status = 'PENDENTE_EDICAO' AND " + 
+                "  u.empresa_id = ?"; 
 
         try (Connection conn = tenantDb.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, rhUser.getId()); // quem aprovou
-            stmt.setInt(2, punchId); // qual batida
-            stmt.setInt(3, empresaDoRh.getId()); // de qual empresa
+            stmt.setInt(1, rhUser.getId()); 
+            stmt.setInt(2, punchId); 
+            stmt.setInt(3, empresaDoRh.getId()); 
 
             int rowsAffected = stmt.executeUpdate();
 
             if (rowsAffected == 0) {
-                // Isso acontece se o 'punchId' não existe OU não está 'PENDENTE'
                 throw new RuntimeException(
                         "Batida de ponto não encontrada, não pertence a esta empresa, ou não está pendente de edição.");
             }
@@ -183,6 +179,7 @@ public class PunchService {
      * @param rhUser  O usuário (RH) que está logado e fazendo a rejeição.
      * @param punchId O ID da batida de ponto que está sendo rejeitada.
      */
+
     public void rejectPunchEdit(User rhUser, Integer punchId) {
 
         Empresa empresaDoRh = rhUser.getEmpresa();
@@ -195,27 +192,23 @@ public class PunchService {
                 ") está REJEITANDO o punch_id: " + punchId);
 
         DataSource tenantDb = tenantDataSource.getDataSource(tenantDatabaseName);
-
-        // SQL de Rejeição:
-        // Mudamos o status para 'REJEITADO' e salvamos quem revisou.
-        // O 'requested_timestamp' é ignorado.
         String sql = "UPDATE punch p " +
                 "JOIN employee e ON p.employee_id = e.id " +
                 "JOIN empresa_master.users u ON e.id = u.client_employee_id " +
                 "SET " +
                 "  p.status = 'REJEITADO', " +
-                "  p.reviewed_by_rh_id = ? " + // O ID do RH
+                "  p.reviewed_by_rh_id = ? " + 
                 "WHERE " +
-                "  p.id = ? AND " + // O ID da batida
-                "  p.status = 'PENDENTE_EDICAO' AND " + // Só podemos rejeitar o que está pendente
-                "  u.empresa_id = ?"; // Garante que o RH só rejeite pontos da SUA empresa
+                "  p.id = ? AND " + 
+                "  p.status = 'PENDENTE_EDICAO' AND " + 
+                "  u.empresa_id = ?"; 
 
         try (Connection conn = tenantDb.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, rhUser.getId()); // quem rejeitou
-            stmt.setInt(2, punchId); // qual batida
-            stmt.setInt(3, empresaDoRh.getId()); // de qual empresa
+            stmt.setInt(1, rhUser.getId()); 
+            stmt.setInt(2, punchId); 
+            stmt.setInt(3, empresaDoRh.getId()); 
 
             int rowsAffected = stmt.executeUpdate();
 
@@ -237,6 +230,7 @@ public class PunchService {
      * @param rhUser O usuário (RH) que está logado.
      * @return Uma lista de DTOs com os pontos pendentes.
      */
+
     public List<PendingPunchDTO> getPendingEdits(User rhUser) {
 
         Empresa empresaDoRh = rhUser.getEmpresa();
@@ -250,10 +244,6 @@ public class PunchService {
 
         DataSource tenantDb = tenantDataSource.getDataSource(tenantDatabaseName);
         List<PendingPunchDTO> pendingList = new ArrayList<>();
-
-        // SQL para buscar pendências:
-        // Precisamos do nome do funcionário (da tabela employee) e dos
-        // dados da batida (da tabela punch), mas SÓ da empresa deste RH.
         String sql = "SELECT " +
                 "  p.id AS punch_id, " +
                 "  p.timestamp AS original_timestamp, " +
@@ -267,12 +257,12 @@ public class PunchService {
                 "JOIN empresa_master.users u ON e.id = u.client_employee_id " +
                 "WHERE " +
                 "  p.status = 'PENDENTE_EDICAO' AND " +
-                "  u.empresa_id = ?"; // Filtra SÓ para a empresa do RH
+                "  u.empresa_id = ?"; 
 
         try (Connection conn = tenantDb.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, empresaDoRh.getId()); // ID da empresa do RH
+            stmt.setInt(1, empresaDoRh.getId()); 
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {

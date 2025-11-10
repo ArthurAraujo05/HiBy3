@@ -9,22 +9,22 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "users") // Mapeia para a tabela "users" que criamos
-public class User implements UserDetails { // <-- A MÁGICA ACONTECE AQUI
+@Table(name = "users") 
+public class User implements UserDetails { 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(unique = true, nullable = false)
-    private String email; // Mapeia a coluna "email"
+    private String email; 
 
     @Column(nullable = false)
-    private String password; // Mapeia a coluna "password"
+    private String password; 
 
-    @Enumerated(EnumType.STRING) // Diz ao JPA para salvar a Role como "RH", "ADMIN", etc.
+    @Enumerated(EnumType.STRING) 
     @Column(nullable = false)
-    private UserRole role; // Mapeia a coluna "role" usando nossa Enum
+    private UserRole role; 
 
     @ManyToOne
     @JoinColumn(name = "empresa_id")
@@ -39,7 +39,7 @@ public class User implements UserDetails { // <-- A MÁGICA ACONTECE AQUI
     }
 
     @Column(name = "client_employee_id")
-    private Integer clientEmployeeId; // O ID do funcionário no banco do CLIENTE
+    private Integer clientEmployeeId; 
 
     public Integer getClientEmployeeId() {
         return clientEmployeeId;
@@ -49,7 +49,6 @@ public class User implements UserDetails { // <-- A MÁGICA ACONTECE AQUI
         this.clientEmployeeId = clientEmployeeId;
     }
 
-    // --- Construtores, Getters e Setters ---
 
     public User() {
     }
@@ -80,14 +79,9 @@ public class User implements UserDetails { // <-- A MÁGICA ACONTECE AQUI
         this.role = role;
     }
 
-    // --- MÉTODOS OBRIGATÓRIOS DO "UserDetails" (Spring Security) ---
-    // O Spring vai chamar estes métodos para saber como "ler" nosso usuário
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Este método informa ao Spring qual é a "Hierarquia" (Cargo) do usuário.
-        // Se for ADMIN, ele pode tudo. Se for RH, pode A, B, C. Se for FUNCIONARIO, só
-        // D, E, F.
         if (this.role == UserRole.ADMIN) {
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_RH"),
                     new SimpleGrantedAuthority("ROLE_FUNCIONARIO"));
@@ -100,15 +94,14 @@ public class User implements UserDetails { // <-- A MÁGICA ACONTECE AQUI
 
     @Override
     public String getPassword() {
-        return this.password; // Retorna a senha (criptografada)
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        return this.email; // Nosso "username" é o email
+        return this.email; 
     }
 
-    // Para este SaaS, vamos deixar as contas sempre ativas
     @Override
     public boolean isAccountNonExpired() {
         return true;

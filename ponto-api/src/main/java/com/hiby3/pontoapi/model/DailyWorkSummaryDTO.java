@@ -3,8 +3,6 @@ package com.hiby3.pontoapi.model;
 import java.math.BigDecimal;
 import java.util.Date;
 
-// DTO (Data Transfer Object)
-// para carregar os resultados da nossa view.
 public class DailyWorkSummaryDTO {
 
     private String funcionario;
@@ -26,5 +24,4 @@ public class DailyWorkSummaryDTO {
     public Double getHorasTrabalhadas() { return horasTrabalhadas; }
     public BigDecimal getTotalPago() { return totalPago; }
     
-    // Setters (são uma boa prática, embora não sejam usados aqui)
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/employees") // URL base: /api/employees
+@RequestMapping("/api/employees") 
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -28,18 +28,12 @@ public class EmployeeController {
     @PostMapping
     public ResponseEntity<Void> createEmployee(
             @RequestBody CreateEmployeeRequestDTO request,
-            Authentication authentication // <-- Injeta os dados do usuário logado
+            Authentication authentication 
     ) {
-        // 1. Pega o objeto 'User' do usuário que está logado
-        // (O Spring Security nos dá isso graças ao token JWT)
         User loggedInRhUser = (User) authentication.getPrincipal();
 
-        // 2. Chama o nosso "cérebro" (service) e passa os dados do 
-        // novo funcionário E os dados de quem está criando (o RH)
         employeeService.createEmployee(request, loggedInRhUser);
 
-        // 3. Retorna um status HTTP 201 (Created), que é o padrão
-        // para um POST que cria algo com sucesso.
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

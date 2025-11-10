@@ -13,12 +13,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/rh") // URL base para TODAS as tarefas de RH
+@RequestMapping("/api/rh") 
 public class RhController {
 
     private final PunchService punchService;
-
-    // Por enquanto, este controller só precisa do PunchService
     public RhController(PunchService punchService) {
         this.punchService = punchService;
     }
@@ -27,18 +25,14 @@ public class RhController {
      * Endpoint para o RH APROVAR uma batida de ponto pendente.
      * URL: PUT http://localhost:8080/api/rh/punches/approve/{punchId}
      */
+
     @PutMapping("/punches/approve/{punchId}")
     public ResponseEntity<Void> approvePunchEdit(
-            @PathVariable Integer punchId, // Pega o ID da batida pela URL
-            Authentication authentication // Pega o usuário (RH) logado
+            @PathVariable Integer punchId, 
+            Authentication authentication 
     ) {
-        // 1. Pega o objeto 'User' do RH que está logado
         User loggedInRhUser = (User) authentication.getPrincipal();
-
-        // 2. Chama o "cérebro" (service) para aprovar a edição
         punchService.approvePunchEdit(loggedInRhUser, punchId);
-
-        // 3. Retorna um status HTTP 200 (OK)
         return ResponseEntity.ok().build();
     }
 
@@ -46,6 +40,7 @@ public class RhController {
      * Endpoint para o RH REJEITAR uma batida de ponto pendente.
      * URL: PUT http://localhost:8080/api/rh/punches/reject/{punchId}
      */
+
     @PutMapping("/punches/reject/{punchId}")
     public ResponseEntity<Void> rejectPunchEdit(
             @PathVariable Integer punchId,
@@ -60,17 +55,14 @@ public class RhController {
      * da sua empresa.
      * URL: GET http://localhost:8080/api/rh/punches/pending
      */
+
     @GetMapping("/punches/pending")
     public ResponseEntity<List<PendingPunchDTO>> getPendingPunchEdits(
-            Authentication authentication // Pega o usuário (RH) logado
+            Authentication authentication 
     ) {
-        // 1. Pega o objeto 'User' do RH que está logado
+
         User loggedInRhUser = (User) authentication.getPrincipal();
-
-        // 2. Chama o "cérebro" (service) para buscar a lista
         List<PendingPunchDTO> pendingList = punchService.getPendingEdits(loggedInRhUser);
-
-        // 3. Retorna a lista (JSON) com status HTTP 200 (OK)
         return ResponseEntity.ok(pendingList);
     }
 }

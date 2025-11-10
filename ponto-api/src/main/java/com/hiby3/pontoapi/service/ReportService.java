@@ -22,7 +22,6 @@ public class ReportService {
     private final EmpresaRepository empresaRepository;
     private final TenantDataSource tenantDataSource;
 
-    // O Spring vai injetar o repositório e nosso orquestrador de conexões
     public ReportService(EmpresaRepository empresaRepository, TenantDataSource tenantDataSource) {
         this.empresaRepository = empresaRepository;
         this.tenantDataSource = tenantDataSource;
@@ -37,31 +36,22 @@ public class ReportService {
      */
     
     public List<DailyWorkSummaryDTO> getDailySummaryForTenant(@NonNull Integer empresaId) {
-
-        // --- ETAPA 1: Achar o nome do banco do cliente ---
         Optional<Empresa> empresaOptional = empresaRepository.findById(empresaId);
         if (empresaOptional.isEmpty()) {
             throw new RuntimeException("Empresa com ID " + empresaId + " não encontrada.");
         }
 
-        // Ex: "empresa_tecnova" ou "empresa_alpha"
         String tenantDatabaseName = empresaOptional.get().getDatabaseName();
         System.out.println(">>> BUSCANDO RELATÓRIO PARA: " + tenantDatabaseName);
 
-        // --- ETAPA 2: Pegar a conexão dinâmica para esse banco ---
         DataSource tenantDataSource = this.tenantDataSource.getDataSource(tenantDatabaseName);
 
-        // --- ETAPA 3: Executar o SQL "clássico" (JDBC) ---
         List<DailyWorkSummaryDTO> report = new ArrayList<>();
         String sql = "SELECT funcionario, data, horas_trabalhadas, total_pago FROM view_daily_work_summary";
 
-        // Usamos try-with-resources para garantir que a conexão e o statement sejam
-        // fechados
         try (Connection conn = tenantDataSource.getConnection();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
-
-            // Itera sobre os resultados da view
             while (rs.next()) {
                 DailyWorkSummaryDTO row = new DailyWorkSummaryDTO(
                         rs.getString("funcionario"),
@@ -72,7 +62,6 @@ public class ReportService {
             }
 
         } catch (SQLException e) {
-            // Em um app real, teríamos um tratamento de erro melhor
             e.printStackTrace();
             throw new RuntimeException("Erro ao buscar relatório: " + e.getMessage());
         }

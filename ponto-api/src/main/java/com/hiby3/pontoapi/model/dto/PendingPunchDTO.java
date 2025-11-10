@@ -2,7 +2,6 @@ package com.hiby3.pontoapi.model.dto;
 
 import java.sql.Timestamp;
 
-// Este é o JSON que vamos retornar para o RH com a lista de pendências
 public class PendingPunchDTO {
 
     // Dados da batida

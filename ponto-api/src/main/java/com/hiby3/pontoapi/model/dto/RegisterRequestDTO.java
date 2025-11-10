@@ -2,12 +2,11 @@ package com.hiby3.pontoapi.model.dto;
 
 import com.hiby3.pontoapi.model.UserRole;
 
-// Esta classe representa o JSON que o frontend vai enviar para /auth/register
 public class RegisterRequestDTO {
     
     private String email;
     private String password;
-    private UserRole role; // A "hierarquia" (ADMIN, RH, ou FUNCIONARIO)
+    private UserRole role; 
 
     // Getters
     public String getEmail() { return email; }

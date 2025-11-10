@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
-@RequestMapping("/api/punches") // URL base: /api/punches
+@RequestMapping("/api/punches") 
 public class PunchController {
 
     private final PunchService punchService;
@@ -28,34 +28,25 @@ public class PunchController {
      * Endpoint para um funcionário "bater o ponto" (registrar um evento).
      * URL: POST http://localhost:8080/api/punches/event
      */
+    
     @PostMapping("/event")
     public ResponseEntity<Void> registerPunchEvent(
             @RequestBody PunchEventRequestDTO request,
-            Authentication authentication // <-- Pega o usuário logado pelo token
-    ) {
-        // 1. Pega o objeto 'User' do funcionário que está logado
+            Authentication authentication 
+    ) { 
         User loggedInUser = (User) authentication.getPrincipal();
-
-        // 2. Chama o "cérebro" (service) para registrar o evento
         punchService.registerPunchEvent(loggedInUser, request);
-
-        // 3. Retorna um status HTTP 201 (Created)
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/edit/{punchId}")
     public ResponseEntity<Void> requestPunchEdit(
-            @PathVariable Integer punchId, // Pega o ID da URL
+            @PathVariable Integer punchId, 
             @RequestBody PunchEditRequestDTO request,
-            Authentication authentication // Pega o usuário logado
+            Authentication authentication 
     ) {
-        // 1. Pega o objeto 'User' do funcionário que está logado
         User loggedInUser = (User) authentication.getPrincipal();
-
-        // 2. Chama o "cérebro" (service) para solicitar a edição
         punchService.requestPunchEdit(loggedInUser, punchId, request);
-
-        // 3. Retorna um status HTTP 200 (OK)
         return ResponseEntity.ok().build();
     }
     

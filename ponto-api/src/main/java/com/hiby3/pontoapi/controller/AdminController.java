@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin") // URL base para TODAS as tarefas de Admin
+@RequestMapping("/api/admin") 
 public class AdminController {
 
     private final AdminService adminService;
@@ -27,10 +27,8 @@ public class AdminController {
     public ResponseEntity<Void> createCompany(
             @RequestBody CreateCompanyRequestDTO request
     ) {
-        // Chama o "cérebro" de automação
         adminService.createNewCompany(request);
 
-        // Retorna 201 Created
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

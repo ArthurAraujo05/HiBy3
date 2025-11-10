@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth") // URL base /auth (que definimos como pública no SecurityConfiguration)
+@RequestMapping("/auth")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
@@ -28,12 +28,8 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponseDTO> register(
             @RequestBody RegisterRequestDTO request
     ) {
-        // @RequestBody pega o JSON enviado pelo frontend e transforma no DTO
-        
-        // Chama o nosso "cérebro" para registrar e gerar o token
         AuthenticationResponseDTO response = authenticationService.register(request);
-        
-        // Retorna o token com um status HTTP 200 (OK)
+
         return ResponseEntity.ok(response);
     }
 
@@ -45,10 +41,8 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponseDTO> login(
             @RequestBody LoginRequestDTO request
     ) {
-        // Chama o nosso "cérebro" para logar e gerar o token
         AuthenticationResponseDTO response = authenticationService.login(request);
-        
-        // Retorna o token com um status HTTP 200 (OK)
+
         return ResponseEntity.ok(response);
     }
 }

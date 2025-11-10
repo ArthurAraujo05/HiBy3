@@ -5,7 +5,6 @@ package com.hiby3.pontoapi.model;
  */
 public enum UserRole {
     
-    // Nossos três níveis de hierarquia
     ADMIN("ADMIN"),
     RH("RH"),
     FUNCIONARIO("FUNCIONARIO");

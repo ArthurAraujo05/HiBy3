@@ -11,12 +11,10 @@ import java.util.List;
 import org.springframework.lang.NonNull;
 
 @RestController
-@RequestMapping("/api/reports") // A URL base para todos os relatórios
+@RequestMapping("/api/reports") 
 public class ReportController {
 
     private final ReportService reportService;
-
-    // Injeta (o service) que criamos
     public ReportController(ReportService reportService) {
         this.reportService = reportService;
     }
@@ -28,9 +26,6 @@ public class ReportController {
      */
     @GetMapping("/{empresaId}/daily-summary")
     public List<DailyWorkSummaryDTO> getDailySummary(@PathVariable @NonNull Integer empresaId) {
-        // @PathVariable pega o "1" ou "2" da URL e passa para o método
-        
-        // Chama o nosso service multi-tenant!
         return reportService.getDailySummaryForTenant(empresaId);
     }
 }

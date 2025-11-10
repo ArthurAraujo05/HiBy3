@@ -38,35 +38,27 @@ public class EmployeeService {
      * @param request      O DTO com os dados do novo funcionário.
      * @param loggedInUser O usuário (RH) que está fazendo a requisição.
      */
+
     @Transactional
     public void createEmployee(CreateEmployeeRequestDTO request, User loggedInUser) {
-        // --- ETAPA A: Criar o usuário de login no banco MESTRE ---
-
-        // 1. Pega a Empresa do usuário de RH que está logado
         Empresa empresaDoRh = loggedInUser.getEmpresa();
         if (empresaDoRh == null) {
             throw new RuntimeException("Usuário de RH não está associado a nenhuma empresa.");
         }
 
-        // 2. Cria o novo usuário (FUNCIONARIO)
         User novoUsuario = new User();
         novoUsuario.setEmail(request.getEmail());
         novoUsuario.setPassword(passwordEncoder.encode(request.getPassword()));
         novoUsuario.setRole(UserRole.FUNCIONARIO);
         novoUsuario.setEmpresa(empresaDoRh);
 
-        // 3. Salva o novo usuário no 'empresa_master.users'
         userRepository.save(novoUsuario);
         System.out.println(">>> (Mestre) Usuário " + request.getEmail() + " criado (Passo 1/2).");
-
-        // --- ETAPA B: Criar o funcionário no banco do CLIENTE ---
-
-        // 1. Pega o nome do banco do cliente (ex: "empresa_tecnova")
         String tenantDatabaseName = empresaDoRh.getDatabaseName();
         DataSource tenantDataSource = this.tenantDataSource.getDataSource(tenantDatabaseName);
         String sql = "INSERT INTO employee (name, hourly_rate) VALUES (?, ?)";
 
-        Integer generatedEmployeeId = null; // Variável para guardar o ID
+        Integer generatedEmployeeId = null; 
 
         try (Connection conn = tenantDataSource.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -76,7 +68,6 @@ public class EmployeeService {
 
             stmt.executeUpdate();
 
-            // Pega o ID que o AUTO_INCREMENT acabou de gerar
             try (var generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     generatedEmployeeId = generatedKeys.getInt(1);
@@ -94,7 +85,7 @@ public class EmployeeService {
 
         if (generatedEmployeeId != null) {
             novoUsuario.setClientEmployeeId(generatedEmployeeId);
-            userRepository.save(novoUsuario); // Salva o usuário DE NOVO, agora com o ID
+            userRepository.save(novoUsuario); 
             System.out.println(">>> (Mestre) Usuário " + request.getEmail() + " atualizado com client_employee_id: " + generatedEmployeeId + " (Passo 2/2).");
         }
     }

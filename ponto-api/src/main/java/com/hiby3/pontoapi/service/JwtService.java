@@ -17,9 +17,6 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-
-    // 1. As chaves agora são injetadas pelo Spring
-    // Elas vêm do application.properties
     
     @Value("${jwt.secret-key}")
     private String SECRET_KEY;
@@ -31,6 +28,7 @@ public class JwtService {
      * Extrai o username (nosso email) de um token.
      * (Método não-estático)
      */
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -39,14 +37,16 @@ public class JwtService {
      * Gera um token de login para um usuário.
      * (Método não-estático)
      */
+
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
     /**
-     * Gera um token de login com "claims" (informações extras)
+     * Gera um token de login com "claims" 
      * (Método não-estático)
      */
+
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(extraClaims)
@@ -58,9 +58,10 @@ public class JwtService {
     }
 
     /**
-     * Verifica se um token é válido (não expirou e foi assinado por nós)
+     * Verifica se um token é válido
      * (Método não-estático)
      */
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
