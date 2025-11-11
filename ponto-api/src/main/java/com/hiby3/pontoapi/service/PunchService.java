@@ -17,6 +17,8 @@ import com.hiby3.pontoapi.model.dto.PendingPunchDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.ResultSet;
+import com.hiby3.pontoapi.model.PunchRecord;
+import java.util.Collections;
 
 @Service
 public class PunchService {
@@ -43,8 +45,8 @@ public class PunchService {
         }
 
         String eventType = request.getEventType().toUpperCase();
-        if (!eventType.equals("ENTRADA") && !eventType.equals("INICIO_INTERVALO") &&
-                !eventType.equals("FIM_INTERVALO") && !eventType.equals("SAIDA")) {
+        if (!eventType.equals("ENTRADA") && !eventType.equals("INICIO-INTERVALO") &&
+                !eventType.equals("FIM-INTERVALO") && !eventType.equals("SAIDA")) {
             throw new IllegalArgumentException("Tipo de evento de ponto inválido: " + request.getEventType());
         }
 
@@ -68,7 +70,7 @@ public class PunchService {
             e.printStackTrace();
             throw new RuntimeException("Erro ao registrar batida de ponto: " + e.getMessage());
         }
-    } 
+    }
 
     /**
      * Solicita a EDIÇÃO de uma batida de ponto existente.
@@ -142,22 +144,22 @@ public class PunchService {
 
         String sql = "UPDATE punch p " +
                 "JOIN employee e ON p.employee_id = e.id " +
-                "JOIN empresa_master.users u ON e.id = u.client_employee_id " + 
+                "JOIN empresa_master.users u ON e.id = u.client_employee_id " +
                 "SET " +
                 "  p.status = 'APROVADO', " +
-                "  p.timestamp = p.requested_timestamp, " + 
-                "  p.reviewed_by_rh_id = ? " + 
+                "  p.timestamp = p.requested_timestamp, " +
+                "  p.reviewed_by_rh_id = ? " +
                 "WHERE " +
-                "  p.id = ? AND " + 
-                "  p.status = 'PENDENTE_EDICAO' AND " + 
-                "  u.empresa_id = ?"; 
+                "  p.id = ? AND " +
+                "  p.status = 'PENDENTE_EDICAO' AND " +
+                "  u.empresa_id = ?";
 
         try (Connection conn = tenantDb.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, rhUser.getId()); 
-            stmt.setInt(2, punchId); 
-            stmt.setInt(3, empresaDoRh.getId()); 
+            stmt.setInt(1, rhUser.getId());
+            stmt.setInt(2, punchId);
+            stmt.setInt(3, empresaDoRh.getId());
 
             int rowsAffected = stmt.executeUpdate();
 
@@ -197,18 +199,18 @@ public class PunchService {
                 "JOIN empresa_master.users u ON e.id = u.client_employee_id " +
                 "SET " +
                 "  p.status = 'REJEITADO', " +
-                "  p.reviewed_by_rh_id = ? " + 
+                "  p.reviewed_by_rh_id = ? " +
                 "WHERE " +
-                "  p.id = ? AND " + 
-                "  p.status = 'PENDENTE_EDICAO' AND " + 
-                "  u.empresa_id = ?"; 
+                "  p.id = ? AND " +
+                "  p.status = 'PENDENTE_EDICAO' AND " +
+                "  u.empresa_id = ?";
 
         try (Connection conn = tenantDb.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, rhUser.getId()); 
-            stmt.setInt(2, punchId); 
-            stmt.setInt(3, empresaDoRh.getId()); 
+            stmt.setInt(1, rhUser.getId());
+            stmt.setInt(2, punchId);
+            stmt.setInt(3, empresaDoRh.getId());
 
             int rowsAffected = stmt.executeUpdate();
 
@@ -257,12 +259,12 @@ public class PunchService {
                 "JOIN empresa_master.users u ON e.id = u.client_employee_id " +
                 "WHERE " +
                 "  p.status = 'PENDENTE_EDICAO' AND " +
-                "  u.empresa_id = ?"; 
+                "  u.empresa_id = ?";
 
         try (Connection conn = tenantDb.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, empresaDoRh.getId()); 
+            stmt.setInt(1, empresaDoRh.getId());
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -284,6 +286,52 @@ public class PunchService {
         }
 
         return pendingList;
+    }
+
+    /**
+     * Lista todos os eventos de ponto (histórico) para um funcionário específico.
+     * 
+     * @param loggedInRhUser   O RH que está a consultar.
+     * @param targetEmployeeId O ID do funcionário a ser consultado (do banco de
+     *                         cliente).
+     * @return Lista de PunchRecord.
+     */
+    public List<PunchRecord> getEmployeePunchHistory(User loggedInRhUser, Integer targetEmployeeId) {
+
+        Empresa empresaDoRh = loggedInRhUser.getEmpresa();
+        if (empresaDoRh == null)
+            return Collections.emptyList();
+        String tenantDatabaseName = empresaDoRh.getDatabaseName();
+
+        System.out.println(
+                ">>> (Cliente " + tenantDatabaseName + ") RH buscando histórico para employee_id: " + targetEmployeeId);
+
+        DataSource tenantDb = tenantDataSource.getDataSource(tenantDatabaseName);
+        List<PunchRecord> history = new ArrayList<>();
+
+        // SQL: Seleciona todos os eventos de um funcionário específico
+        String sql = "SELECT id, timestamp, event_type, status FROM punch WHERE employee_id = ? ORDER BY timestamp DESC";
+
+        try (Connection conn = tenantDb.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, targetEmployeeId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    history.add(new PunchRecord(
+                            rs.getInt("id"),
+                            rs.getTimestamp("timestamp"),
+                            rs.getString("event_type"),
+                            rs.getString("status")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar histórico do ponto: " + e.getMessage());
+        }
+
+        return history;
     }
 
 }

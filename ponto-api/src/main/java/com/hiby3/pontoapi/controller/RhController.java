@@ -1,5 +1,6 @@
 package com.hiby3.pontoapi.controller;
 
+import com.hiby3.pontoapi.model.PunchRecord;
 import com.hiby3.pontoapi.model.User;
 import com.hiby3.pontoapi.service.PunchService;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/rh") 
+@RequestMapping("/api/rh")
 public class RhController {
 
     private final PunchService punchService;
+
     public RhController(PunchService punchService) {
         this.punchService = punchService;
     }
@@ -28,9 +30,8 @@ public class RhController {
 
     @PutMapping("/punches/approve/{punchId}")
     public ResponseEntity<Void> approvePunchEdit(
-            @PathVariable Integer punchId, 
-            Authentication authentication 
-    ) {
+            @PathVariable Integer punchId,
+            Authentication authentication) {
         User loggedInRhUser = (User) authentication.getPrincipal();
         punchService.approvePunchEdit(loggedInRhUser, punchId);
         return ResponseEntity.ok().build();
@@ -58,11 +59,26 @@ public class RhController {
 
     @GetMapping("/punches/pending")
     public ResponseEntity<List<PendingPunchDTO>> getPendingPunchEdits(
-            Authentication authentication 
-    ) {
+            Authentication authentication) {
 
         User loggedInRhUser = (User) authentication.getPrincipal();
         List<PendingPunchDTO> pendingList = punchService.getPendingEdits(loggedInRhUser);
         return ResponseEntity.ok(pendingList);
+    }
+
+    /**
+     * Endpoint para o RH buscar o histórico de pontos de um funcionário específico.
+     * URL: GET http://localhost:8080/api/rh/employees/{employeeId}/punches
+     */
+
+    @GetMapping("/employees/{employeeId}/punches")
+    public ResponseEntity<List<PunchRecord>> getEmployeePunchHistory(
+            @PathVariable Integer employeeId,
+            Authentication authentication) {
+        User loggedInRhUser = (User) authentication.getPrincipal();
+
+        List<PunchRecord> history = punchService.getEmployeePunchHistory(loggedInRhUser, employeeId);
+
+        return ResponseEntity.ok(history);
     }
 }
