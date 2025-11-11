@@ -1,0 +1,56 @@
+<div *ngIf="isLoading" class="text-center p-4 text-gray-500">
+  Carregando tarefas...
+</div>
+
+<div *ngIf="errorMessage" class="rounded-md bg-red-100 p-4 text-center text-red-700 font-medium">
+  {{ errorMessage }}
+</div>
+
+<div class="rounded-lg bg-white shadow-md overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+      <tr>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Funcionário</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Motivo da Edição</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Hor. Original</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Hor. Solicitado</th>
+        <th scope="col" class="relative px-6 py-3">
+          <span class="sr-only">Ações</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200 bg-white">
+      
+      <tr *ngFor="let task of pendingTasks">
+        <td class="whitespace-nowrap px-6 py-4">
+          <div class="text-sm font-medium text-gray-900">{{ task.employeeName }}</div>
+          <div class="text-sm text-gray-500">{{ task.eventType }}</div>
+        </td>
+        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">{{ task.reason }}</td>
+        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ task.originalTimestamp | date: 'HH:mm:ss' }}</td>
+        <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-orange-600">{{ task.requestedTimestamp | date: 'HH:mm:ss' }}</td>
+        
+        <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+          <div class="flex gap-2">
+            <button (click)="handleApproval(task.punchId, 'approve')" 
+                    [disabled]="isLoading"
+                    class="rounded-md bg-green-600 px-3 py-1 text-white shadow-sm hover:bg-green-700 disabled:opacity-50">
+              Aprovar
+            </button>
+            <button (click)="handleApproval(task.punchId, 'reject')" 
+                    [disabled]="isLoading"
+                    class="rounded-md bg-red-600 px-3 py-1 text-white shadow-sm hover:bg-red-700 disabled:opacity-50">
+              Rejeitar
+            </button>
+          </div>
+        </td>
+      </tr>
+
+      <tr *ngIf="!isLoading && pendingTasks.length === 0">
+        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+          Nenhuma solicitação pendente. Caixa de entrada limpa!
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,68 @@
+<div class="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+
+  <div class="w-full max-w-md space-y-6 rounded-2xl bg-white p-8 shadow-xl md:p-12">
+    
+    <div class="text-center">
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+        HiBy3 WorkFlow
+      </h1>
+      <p class="mt-2 text-sm text-gray-500">
+        Bem-vindo(a) de volta! Acesse sua plataforma.
+      </p>
+    </div>
+
+    <form class="space-y-5" (ngSubmit)="onLogin()">
+      
+      <div>
+        <label for="email" class="mb-1 block text-sm font-medium text-gray-700">
+          E-mail
+        </label>
+        <input 
+          id="email"
+          name="email"
+          type="email"
+          required
+          [(ngModel)]="loginData.email"
+          placeholder="seu.email@empresa.com.br"
+          class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </div>
+
+      <div>
+        <label for="password" class="mb-1 block text-sm font-medium text-gray-700">
+          Senha
+        </label>
+        <input 
+          id="password"
+          name="password"
+          type="password"
+          required
+          [(ngModel)]="loginData.password"
+          placeholder="••••••••"
+          class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </div>
+
+      <div *ngIf="isLoading" class="text-center text-sm text-gray-500">
+        Autenticando...
+      </div>
+      <div *ngIf="errorMessage" class="rounded-md bg-red-50 p-3 text-center text-sm font-medium text-red-700">
+        {{ errorMessage }}
+      </div>
+
+      <button 
+        type="submit"
+        [disabled]="isLoading"
+        class="w-full rounded-md bg-gray-900 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Entrar
+      </button>
+
+    </form>
+    
+    <p class="text-center text-xs text-gray-500">
+      Não tem uma conta? Solicite acesso ao seu administrador de RH.
+    </p>
+
+  </div>
+</div>
