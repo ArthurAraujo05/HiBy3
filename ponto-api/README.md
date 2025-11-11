@@ -82,4 +82,22 @@ A API estará acessível em `http://localhost:8080`.
 | `POST` | `/auth/login` | Autentica o usuário e retorna o **JWT**. | Público |
 | `POST` | `/api/punches/event` | Registra uma batida de ponto (`ENTRADA`, `SAIDA`). | Funcionário Logado |
 | `GET` | `/api/rh/punches/pending` | Lista todas as pendências de edição da empresa. | ROLE\_RH |
-| `GET` | `/api/reports/{id}/daily-summary` | Gera o resumo diário de uma empresa (Tenant). | ROLE\_RH
+| `GET` | `/api/reports/{id}/daily-summary` | Gera o resumo diário de uma empresa (Tenant). | ROLE\_RH / ROLE\_ADMIN |
+
+<br/>
+
+**Dica:** Sugerimos usar o **Insomnia** ou **Postman** para testar os endpoints. O arquivo de coleção (collection) pode ser adicionado à raiz do repositório para facilitar o teste.
+
+---
+
+## 🤝 Contribuições
+
+Contribuições são bem-vindas! Por favor, siga estes passos:
+
+1.  Faça um *fork* do projeto.
+2.  Crie uma nova *branch* (`git checkout -b feature/sua-feature-nova`).
+3.  Faça suas alterações e *commit* (`git commit -am 'Add new feature'`).
+4.  *Push* para a branch (`git push origin feature/sua-feature-nova`).
+5.  Crie um novo *Pull Request*.
+
+---
