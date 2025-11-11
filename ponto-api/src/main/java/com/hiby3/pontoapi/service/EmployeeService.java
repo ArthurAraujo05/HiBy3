@@ -1,5 +1,9 @@
 package com.hiby3.pontoapi.service;
 
+import com.hiby3.pontoapi.model.Employee;
+import java.util.ArrayList;
+import java.util.List;
+import java.sql.ResultSet;
 import com.hiby3.pontoapi.config.TenantDataSource;
 import com.hiby3.pontoapi.model.Empresa;
 import com.hiby3.pontoapi.model.User;
@@ -15,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 
 @Service
 public class EmployeeService {
@@ -58,7 +63,7 @@ public class EmployeeService {
         DataSource tenantDataSource = this.tenantDataSource.getDataSource(tenantDatabaseName);
         String sql = "INSERT INTO employee (name, hourly_rate) VALUES (?, ?)";
 
-        Integer generatedEmployeeId = null; 
+        Integer generatedEmployeeId = null;
 
         try (Connection conn = tenantDataSource.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -85,8 +90,57 @@ public class EmployeeService {
 
         if (generatedEmployeeId != null) {
             novoUsuario.setClientEmployeeId(generatedEmployeeId);
-            userRepository.save(novoUsuario); 
-            System.out.println(">>> (Mestre) Usuário " + request.getEmail() + " atualizado com client_employee_id: " + generatedEmployeeId + " (Passo 2/2).");
+            userRepository.save(novoUsuario);
+            System.out.println(">>> (Mestre) Usuário " + request.getEmail() + " atualizado com client_employee_id: "
+                    + generatedEmployeeId + " (Passo 2/2).");
         }
     }
+
+    // Em EmployeeService.java
+
+    // ... (construtor existente) ...
+
+    /**
+     * Lista todos os funcionários do banco de dados do cliente do RH logado.
+     * 
+     * @param loggedInRhUser O usuário (RH) que está logado.
+     * @return Uma lista de objetos Employee.
+     */
+    public List<Employee> listEmployees(User loggedInRhUser) {
+
+        Empresa empresaDoRh = loggedInRhUser.getEmpresa();
+        if (empresaDoRh == null) {
+            return Collections.emptyList(); // Retorna vazio se não houver empresa ligada
+        }
+        String tenantDatabaseName = empresaDoRh.getDatabaseName();
+
+        System.out.println(">>> (Cliente " + tenantDatabaseName + ") RH buscando lista de funcionários.");
+
+        DataSource tenantDb = tenantDataSource.getDataSource(tenantDatabaseName);
+        List<Employee> employeeList = new ArrayList<>();
+
+        // SQL: Seleciona todos da tabela employee
+        String sql = "SELECT id, name, hourly_rate FROM employee";
+
+        try (Connection conn = tenantDb.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Employee employee = new Employee(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getBigDecimal("hourly_rate"));
+                employeeList.add(employee);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao listar funcionários: " + e.getMessage());
+        }
+
+        return employeeList;
+    }
+
+    // ... (método createEmployee existente) ...
 }
