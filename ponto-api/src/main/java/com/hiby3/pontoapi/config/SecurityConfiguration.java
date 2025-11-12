@@ -39,6 +39,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/rh/**").hasAnyRole("RH", "ADMIN")
                         .requestMatchers("/api/reports/**").hasAnyRole("RH", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/employees").hasAnyRole("RH")
+                        .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasAnyRole("RH", "ADMIN")
                         .requestMatchers("/api/empresas").authenticated()
                         .requestMatchers("/api/punches/**").authenticated()
                         .anyRequest().authenticated())
