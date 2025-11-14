@@ -1,11 +1,13 @@
 package com.hiby3.pontoapi.model;
 
+import java.time.LocalDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 
 @Entity
 @Table(name = "empresas")
@@ -58,4 +60,40 @@ public class Empresa {
     public void setDatabaseName(String databaseName) {
         this.databaseName = databaseName;
     }
+
+    @Column(name = "licenca_tier", nullable = false)
+    private String licencaTier;
+
+    // 2. A data em que o trial expira (necessário para o teste de 15 dias)
+    @Column(name = "trial_end_date")
+    private LocalDate trialEndDate;
+
+    // 3. O status da conta (para saber se o acesso deve ser bloqueado)
+    @Column(name = "status", nullable = false)
+    private String status = "ATIVO"; // Ex: ATIVO, INATIVO, TESTE_EXPIRADO
+
+    public String getLicencaTier() {
+        return licencaTier;
+    }
+
+    public void setLicencaTier(String licencaTier) {
+        this.licencaTier = licencaTier;
+    }
+
+    public LocalDate getTrialEndDate() {
+        return trialEndDate;
+    }
+
+    public void setTrialEndDate(LocalDate trialEndDate) {
+        this.trialEndDate = trialEndDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 }

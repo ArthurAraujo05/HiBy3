@@ -4,27 +4,26 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "users") 
-public class User implements UserDetails { 
+@Table(name = "users")
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(unique = true, nullable = false)
-    private String email; 
+    private String email;
 
     @Column(nullable = false)
-    private String password; 
+    private String password;
 
-    @Enumerated(EnumType.STRING) 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRole role; 
+    private UserRole role;
 
     @ManyToOne
     @JoinColumn(name = "empresa_id")
@@ -39,7 +38,7 @@ public class User implements UserDetails {
     }
 
     @Column(name = "client_employee_id")
-    private Integer clientEmployeeId; 
+    private Integer clientEmployeeId;
 
     public Integer getClientEmployeeId() {
         return clientEmployeeId;
@@ -48,7 +47,6 @@ public class User implements UserDetails {
     public void setClientEmployeeId(Integer clientEmployeeId) {
         this.clientEmployeeId = clientEmployeeId;
     }
-
 
     public User() {
     }
@@ -79,6 +77,34 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    // === INÍCIO: GETTERS DE LICENCIAMENTO ===
+
+    public String getLicencaTier() {
+        // Retorna o Tier da licença (TRIAL, PROFESSIONAL)
+        if (this.empresa != null) {
+            return this.empresa.getLicencaTier();
+        }
+        return null;
+    }
+
+    public java.time.LocalDate getTrialEndDate() {
+        // Retorna a data de expiração do teste de 15 dias
+        if (this.empresa != null) {
+            return this.empresa.getTrialEndDate();
+        }
+        return null;
+    }
+
+    public String getStatus() {
+        // Retorna o Status da Conta (ATIVO, TESTE_EXPIRADO)
+        if (this.empresa != null) {
+            return this.empresa.getStatus();
+        }
+        return null;
+    }
+    
+    // === FIM: GETTERS DE LICENCIAMENTO ===
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -99,7 +125,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email; 
+        return this.email;
     }
 
     @Override
